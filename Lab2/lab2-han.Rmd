@@ -1,0 +1,25 @@
+---
+title: "lab-2"
+author: "Vincent Han"
+date: "2023-06-10"
+output: html_document
+---
+
+```{r}
+processors <- read.csv("C:/Users/1hanv/OneDrive/Documents/Workspace/EE5373/Lab2/all-data.csv")
+
+# Step 1: Read the CSV file into a data frame
+data <- read.csv("your_file.csv")
+
+# Step 2: Calculate the mean, variance, min, and max for each column
+column_stats <- data.frame(
+  Mean = apply(data, 2, mean, na.rm = TRUE),
+  Variance = apply(data, 2, var, na.rm = TRUE),
+  Min = apply(data, 2, min, na.rm = TRUE),
+  Max = apply(data, 2, max, na.rm = TRUE)
+)
+
+# Step 3: Print the calculated statistics
+print(column_stats)
+
+```

@@ -1,13 +1,13 @@
 ---
-title: "Lab2Start"
-author: "alex dukart"
+title: "Lab 2"
+author: "Vincent Han"
 date: "2023-06-12"
 output: html_document
 ---
 
 ```{r}
 getwd()
-processors <- read.csv("Downloads/all-data.csv")
+processors <- read.csv("C:/Users/1hanv/OneDrive/Documents/Workspace/EE5373/Lab2/all-data.csv")
 #set your directory here
 
 
