@@ -1,0 +1,94 @@
+---
+title: "Lab7start"
+author: "alex dukart"
+date: "2023-07-17"
+output: html_document
+---
+
+
+```{r}
+#make sure to install these
+library(ggplot2)
+library(gganimate)
+```
+
+
+problem1
+```{r}
+#create errors for full dataset using split = .7 train, .3 test
+
+
+#store them into the test dataset
+test$errors <- errors
+
+
+perc <- c(.01,.05,.1,1)
+
+for (x in perc){
+  #here split into test and train, just use train, your full dataset will be a test dataset created above
+  index <- 1:length(train$price)
+
+  base_map <- ggplot(
+	data = train, 
+	mapping = aes(x=index,y = abs(errors), color=abs(errors),size=price))+ geom_point()
+  base_map
+  #just need to change this slightly so that it outputs all four charts
+}
+```
+
+
+
+
+
+problem2
+
+```{r}
+#animation should be relatively simple, use the "animate" function with the "duration" parameter
+```
+
+
+Problem3
+```{r}
+ create_errors <- function(price,bedrooms,bathrooms,sqft_living,sqft_lot,grade,yr_built) {
+   #here create the train/test split for each zipcode and then generate the prediction
+   error <- abs(mean(100*((test$price - pred)/test$price)))
+ }
+
+
+
+data_by_zipcode <- datafinal1 %>% 
+  group_by(zipcode) %>% 
+  summarise(
+    count = n(),
+    med_price = median(price),
+    mean_lat = mean(lat),
+    mean_long = mean(long),
+    avg_price = mean(price),
+    med_yr_built = median(yr_built),
+    error = create_errors(price,bedrooms,bathrooms,sqft_living,sqft_lot,grade,yr_built))
+```
+
+
+```{r}
+library(maps)
+which_state <- "Washington"
+county_info <- map_data("county", region=which_state)
+base_map <- ggplot(
+	data = county_info, 
+	mapping = aes(x = long, y = lat, group = group)) +
+	geom_polygon(color = "black", fill = "white") +
+	coord_quickmap() +
+	theme_void() 
+base_map
+
+#finish this up by adding the points from the data_by_zipcode dataset (longitude and latitude) and let the size=price, zoom in as appropriate using the same method as shown in the slides.
+
+```
+
+
+
+
+
+
+
+

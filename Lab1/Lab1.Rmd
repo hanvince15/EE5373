@@ -1,0 +1,96 @@
+---
+title: "Lab1"
+author: "alex dukart"
+date: "2023-06-05"
+output: html_document
+---
+
+Get R and R-studio
+
+cran.r-project.org
+$$$$
+www.rstudio.com
+$$$$
+Defining variables!!
+```{r}
+x <- 1
+x <- 1
+mat = matrix(c(8,4,5,6,7,9),nrow = 2, ncol = 3,byrow = TRUE)
+as.data.frame(mat)
+```
+
+loading packages!!!
+
+```{r}
+library(MASS)
+library(ggplot2)
+```
+
+Loading in datasets, first lets set our directory,
+
+```{r}
+setwd("C:/Users/1hanv/OneDrive/Documents/EE5373/Lab1")
+nbadf <- read.csv("nbaplayersdraft.csv")
+nbadf
+#pooldf <- read.table("Chlorine.txt",header=TRUE)
+#pooldf
+```
+
+
+Plots and Graphs
+
+```{r}
+plot(nbadf$overall_pick,nbadf$points)
+```
+
+
+```{r}
+list(nbadf$overall_pick)
+plot(aggregate(nbadf$points,list(nbadf$overall_pick),mean))
+```
+
+
+
+z.umn.edu/lrur
+
+
+
+```{r}
+# Based on https://en.wikipedia.org/wiki/R_%28programming_language%29
+
+##########################################################
+# Define the fractal function
+fractal <- function(iters, dim, xlo, xhi, ylo, yhi) {
+
+
+C <- complex(real=rep(seq(xlo,xhi, length.out=dim), each=dim ),
+              imag=rep(seq(ylo,yhi, length.out=dim), dim ) )
+C <- array(C,c(dim,dim))      # reshape as square matrix of complex numbers
+Z <- 0                   
+for (k in 1:iters) {        
+  Z <- Z^4 + C
+}
+
+X <- array(0, c(dim,dim))
+X <- exp(-abs(Z))
+image(X,col=topo.colors(100))
+}
+##########################################################
+
+
+##########################################################
+# The main program starts here.
+#
+
+fractal(iters=1000, dim=1000, xlo=-3.6, xhi=1.2, ylo=-2.4, yhi=2.4)
+```
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,157 @@
+---
+title: "Lab3"
+author: "alex dukart"
+date: "2023-06-14"
+output: html_document
+---
+
+```{r}
+crab <- read.table("crab.txt",header=TRUE)
+nbadf <- read.csv("nbaplayersdraft.csv")
+md1 <- lm(satell~width,data=crab)
+#comments here#
+resid(md1)
+plot(crab$width,crab$satell)
+abline(md1)
+summary(md1)
+plot(md1)
+```
+
+Assumption 1
+
+Linear relationship
+
+```{r}
+plot(crab$width,crab$satell)
+```
+
+What we are looking for,
+
+```{r}
+plot(nbadf$points,nbadf$assists)
+```
+
+What we are NOT looking for,
+
+```{r}
+x = c(1,2,3,4,5,6,7,8,9,10)
+y  = x^4 + rnorm(10,sd=3)
+plot(x,y)
+```
+
+Assumption 2
+
+Normally distributed errors 
+
+
+
+(good example of normality of errors assumption failing)
+
+
+```{r}
+plot(md1)
+```
+
+What we are looking for,
+
+```{r}
+x1 <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+y1 <- 3*x1 + rnorm(20)
+md3 <- lm(y1~x1)
+plot(md3)
+```
+
+
+What we are not looking for,
+
+bad qq plot
+
+```{r}
+md2 <- lm(y~x)
+plot(md2)
+```
+
+
+Assumption 3
+
+Constant errors (no patterns)
+
+
+```{r}
+plot(md1)
+```
+what we are looking for,
+
+
+
+```{r}
+plot(md3)
+```
+
+
+
+
+
+What we are not looking for,
+
+```{r}
+md2 <- lm(y~x)
+plot(md2)
+```
+
+silly example
+
+```{r}
+library(rlang) 
+library(alr4) 
+Rpdata
+mdd <- lm(y ~ x1 + x2 + x3 + x4 + x5 + x6, data=Rpdata)
+summary(mdd)
+plot(lm(y ~ x1 + x2 + x3 + x4 + x5 + x6, data=Rpdata))
+```
+
+
+
+Assumption 4
+
+
+No outliers
+
+
+```{r}
+plot(crab$width,crab$satell)
+```
+
+
+
+
+What we are looking for
+
+```{r}
+plot(x1,y1)
+```
+
+
+What we are not looking for
+
+```{r}
+setwd("/Users/alexanderdukart/Downloads")
+train <- read.csv("train.data.csv")
+zips <- factor(train$zipcode,labels = unique(train$zipcode))
+model1 <- lm(price ~ bedrooms + bathrooms + sqft_living + sqft_lot, data=train)
+summary(model1)
+traintest <- train
+for (i in unique(train$zipcode)){
+   traintest[traintest == i] <- toString(i)
+}
+
+plot(traintest$sqft_living,log(traintest$price))
+mod <- lm(log(price)~sqft_living,data=traintest)
+plot(mod)
+```
+
+
+
+
+
+

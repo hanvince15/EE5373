@@ -1,0 +1,166 @@
+---
+title: "Lab4"
+author: "alex dukart"
+date: "2023-06-26"
+output: html_document
+---
+
+```{r}
+setwd("C:/Users/1hanv/OneDrive/Documents/EE5373/Lab4")
+processors <- read.csv("all-data.csv")
+#set your directory here
+
+
+################################################################
+#
+# This function returns the data from the desired column.
+# Example:  clock<-get_column("Fp2000","Processor.Clock..MHz.")
+
+get_column <- function(x,y) {
+
+# x = string with the name of the desired benchmark
+# y = desired column
+#
+# Find the indices of all rows that have an entry for the  
+# indicated benchmark
+benchmark <- paste(paste("Spec",x,sep=""),"..average.base.",
+	sep="")
+ix <- !is.na(processors[,benchmark])
+return(processors[ix,y])
+}
+################################################################
+
+
+
+
+################################################################
+# This function extracts the interesting data columns for the given benchmark
+# program and returns a dataframe with these columns.
+
+extract_data <- function(benchmark) {
+
+temp <- paste(paste("Spec",benchmark,sep=""),"..average.base.", sep="")
+
+# perf = the performance reported in the database
+perf <- get_column(benchmark,temp)
+
+#nperf = performance normalized to the overall range
+max_perf <- max(perf)
+min_perf <- min(perf)
+range <- max_perf - min_perf
+nperf <- 100 * (perf - min_perf) / range
+
+clock <- get_column(benchmark,"Processor.Clock..MHz.")
+threads <- get_column(benchmark,"Threads.core")
+cores <- get_column(benchmark,"Cores")
+TDP <- get_column(benchmark,"TDP")
+transistors <- get_column(benchmark,"Transistors..millions.")
+dieSize <- get_column(benchmark,"Die.size..mm.2.")
+voltage <- get_column(benchmark,"Voltage..low.")
+featureSize <- get_column(benchmark,"Feature.Size..microns.")
+channel <- get_column(benchmark,"Channel.length..microns.")
+FO4delay <- get_column(benchmark,"FO4.Delay..ps.")
+L1icache <- get_column(benchmark,"L1..instruction...on.chip.")
+L1dcache <- get_column(benchmark,"L1..data...on.chip.")
+L2cache <- get_column(benchmark,"L2..on.chip.")
+L3cache <- get_column(benchmark,"L3..on.chip.")
+
+return(data.frame(nperf,perf,clock,threads,cores,TDP,transistors,dieSize,voltage,featureSize,channel,FO4delay,L1icache,L1dcache,L2cache,L3cache))
+
+}
+int95.dat <- extract_data("Int1995")
+fp95.dat <- extract_data("Fp1995")
+int06.dat <- extract_data("Int2006")
+fp06.dat <- extract_data("Fp2006")
+
+```
+
+int95 I chose most of the variables but got rid of enough to have greater than 50 datapoints. I also removed the variables that have constant values.
+
+Read this is you want to understand why backward selection with pvals is kind of bad. <https://mattkcole.com/2017/01/22/the-problem-with-backward-selection/>
+
+```{r}
+library(MASS)
+int95 <- int95.dat
+int95 <- int95[,-c(1,4,5,6,15,16)]
+dataint95 <- na.omit(int95)
+dataint95$sqrtcache <- sqrt(dataint95$L1icache)
+md1 <- lm(perf~.,data=dataint95)
+stepAIC(md1,direction='backward')
+
+int06 <- int06.dat
+int06 <- int06[,-c(1,4,5,6,15,16)]
+dataint06 <- na.omit(int06)
+dataint06$sqrtcache <- sqrt(dataint06$L1icache)
+md1 <- lm(perf~.,data=dataint06)
+stepAIC(md1,direction='backward')
+
+fp95 <- fp95.dat
+fp95 <- fp95[,-c(1,4,5,6,15,16)]
+datafp95 <- na.omit(fp95)
+datafp95$sqrtcache <- sqrt(datafp95$L1icache)
+md1 <- lm(perf~.,data=datafp95)
+stepAIC(md1,direction='backward')
+
+fp06 <- fp06.dat
+fp06 <- fp06[,-c(1,4,5,6,15,16)]
+datafp06 <- na.omit(fp06)
+datafp06$sqrtcache <- sqrt(datafp06$L1icache)
+md1 <- lm(perf~.,data=datafp06)
+stepAIC(md1,direction='backward')
+```
+
+```{r}
+pairs(dataint95)
+
+pairs(dataint06)
+
+pairs(datafp95)
+
+pairs(datafp06)
+```
+
+The resulting model is
+
+#perf \~ clock + voltage + sqrtcache#
+
+```{r}
+fmod <- lm(perf ~ clock + voltage + sqrtcache,data=dataint95)
+plot(fmod)
+
+imod <- lm(perf ~ clock + voltage + sqrtcache,data=dataint06)
+plot(imod)
+
+smod <- lm(perf ~ clock + voltage + sqrtcache,data=datafp95)
+plot(smod)
+
+lmod <- lm(perf ~ clock + voltage + sqrtcache,data=datafp06)
+plot(lmod)
+```
+
+```{r}
+summary(fmod)
+
+summary(imod)
+
+summary(smod)
+
+summary(lmod)
+```
+I had picked the three predictors since those are the 3 most commonly advertised when looking at CPU stats.
+
+1.  Linear relationship
+
+From the scatterplot pairs plot above we can see that the relationship is (approximately) linear for most.
+
+2.  Normality
+
+QQplot shows that we might have a problem with the normality of our datapoints. But it looks decent.
+
+3.  Multicollinearity
+
+The pairs function shows that we might have correlation between a few of our variables.
+
+4.  Homoskedacity
+
+Normally distributed but maybe constant variance assumption is violated. Non constant variance.

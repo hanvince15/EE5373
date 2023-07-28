@@ -1,0 +1,116 @@
+---
+title: "Lab1-2"
+author: "alex dukart"
+date: "2023-06-06"
+output: html_document
+---
+
+Basic R functions!!
+
+```{r}
+x <- c(1,2,3,4,5)
+mean(x)
+sd(x)
+plot(x)
+range(x)
+#indexing
+x[1]
+#indexing matrices
+mat <- matrix(c(8,4,5,6,7,9),nrow = 2, ncol = 3,byrow = TRUE)
+mat[1,2]
+
+```
+
+Fix data frames with NA (missing) values
+
+
+```{r}
+setwd("C:/Users/1hanv/OneDrive/Documents/EE5373/Lab1")
+nbadf <- read.csv("nbaplayersdraft.csv")
+nbadf
+nbadfnew <- na.omit(nbadf)
+```
+
+```{r}
+plot(nbadfnew$overall_pick,nbadfnew$points)
+plot(aggregate(nbadfnew$points,list(nbadfnew$overall_pick),mean))
+```
+
+ok but what if the second picks play good defense or something...
+
+```{r}
+plot(aggregate(nbadfnew$value_over_replacement,list(nbadfnew$overall_pick),mean))
+```
+
+What is going on with the 57th pick???!??!??!
+
+```{r}
+
+fiftyseven <- subset(nbadfnew,overall_pick == 57)
+
+```
+
+Manu strikes again
+
+Useful functions for summary statistics
+
+```{r}
+#install Hmisc before running this
+library('Hmisc')
+describe(nbadfnew)
+
+```
+
+Table is useful to but for smaller datasets.
+
+if else statements
+
+```{r}
+x <- 5
+if(x > 0){
+print("Non-negative number")
+} else {
+print("Negative number")
+}
+```
+
+
+
+
+
+
+
+for loops
+
+```{r}
+for (x in 1:5) {
+    print(x)
+}
+```
+
+While Loops
+
+```{r}
+i <- 1
+while (i < 6) {
+  print(i)
+  i <- i + 1
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

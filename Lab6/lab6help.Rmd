@@ -1,0 +1,54 @@
+---
+title: "DPLYR tutorial"
+author: "alex dukart"
+date: "2023-07-10"
+output: html_document
+---
+
+```{r}
+setwd("/Users/alexanderdukart/Documents/Rdatasets")
+datahouse <- read.csv("/Users/alexanderdukart/Documents/Rdatasets/kc_house_data.csv")
+datafinal <- datahouse[,-c(1,2,17)]
+datafinal1 <- datahouse[,-c(1,2)]
+```
+
+
+```{r}
+datafinal1z <- datafinal1
+for (i in unique(datafinal1z$zipcode)){
+   datafinal1z[datafinal1z == i] <- toString(i)
+}
+summary(lm(price~zipcode,data=datafinal1z))
+```
+
+
+
+
+```{r}
+setwd("/Users/alexanderdukart/Documents/Rdatasets")
+datahouse <- read.csv("/Users/alexanderdukart/Documents/Rdatasets/kc_house_data.csv")
+datafinal <- datahouse[,-c(1,2,17)]
+datafinal1 <- datahouse[,-c(1,2)]
+library("dplyr")
+
+price_prediction_error <- function(price,bedrooms,sqft_living,...){
+  #recreate dataset here
+  #then do training test split
+  #then make prediction
+  rmse <- sqrt(mean((test$price - pred)^2))
+  
+}
+
+
+data_by_zipcode <- datafinal1 %>% 
+  group_by(zipcode) %>% 
+  summarize(
+    count = n(),
+    med_price = median(price),
+    med_yr_built = median(yr_built),
+    error <- price_prediction_error(price,bedrooms,sqft_living,...)
+)
+
+
+```
+
