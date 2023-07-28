@@ -6,20 +6,116 @@ output: html_document
 ---
 
 ```{r}
-processors <- read.csv("C:/Users/1hanv/OneDrive/Documents/Workspace/EE5373/Lab2/all-data.csv")
 
-# Step 1: Read the CSV file into a data frame
-data <- read.csv("your_file.csv")
+data <- read.csv("C:/Users/1hanv/OneDrive/Documents/Workspace/EE5373/Lab2/all-data.csv")
 
-# Step 2: Calculate the mean, variance, min, and max for each column
+numeric_columns <- sapply(data, is.numeric)
+integer_columns <- sapply(data, is.integer)
+valid_columns <- numeric_columns | integer_columns
+
 column_stats <- data.frame(
-  Mean = apply(data, 2, mean, na.rm = TRUE),
-  Variance = apply(data, 2, var, na.rm = TRUE),
-  Min = apply(data, 2, min, na.rm = TRUE),
-  Max = apply(data, 2, max, na.rm = TRUE)
+  Mean = apply(data[, valid_columns], 2, mean, na.rm = TRUE),
+  Variance = apply(data[, valid_columns], 2, var, na.rm = TRUE),
+  Min = apply(data[, valid_columns], 2, min, na.rm = TRUE),
+  Max = apply(data[, valid_columns], 2, max, na.rm = TRUE)
 )
 
-# Step 3: Print the calculated statistics
+# Print the calculated statistics
 print(column_stats)
 
 ```
+
+```{r}
+
+numeric_columns <- sapply(data, is.numeric)
+valid_data <- data[, numeric_columns]
+
+find_outliers <- function(column) {
+  column_no_na <- column[!is.na(column)]
+  if (length(column_no_na) > 0) {
+    q1 <- quantile(column_no_na, 0.25)
+    q3 <- quantile(column_no_na, 0.75)
+    iqr <- q3 - q1
+    lower_bound <- q1 - 1.5 * iqr
+    upper_bound <- q3 + 1.5 * iqr
+    outliers <- column_no_na[column_no_na < lower_bound | column_no_na > upper_bound]
+    return(outliers)
+  } else {
+    return(NULL)
+  }
+}
+
+column_stats <- data.frame(
+  Mean = apply(valid_data, 2, mean, na.rm = TRUE),
+  Variance = apply(valid_data, 2, var, na.rm = TRUE),
+  Min = apply(valid_data, 2, min, na.rm = TRUE),
+  Max = apply(valid_data, 2, max, na.rm = TRUE)
+)
+
+for (col in colnames(valid_data)) {
+  outliers <- find_outliers(valid_data[[col]])
+  if (length(outliers) > 0) {
+    cat("Column:", col, "Outliers:", outliers, "\n")
+  }
+}
+
+```
+
+```{r}
+
+numeric_columns <- sapply(data, is.numeric)
+valid_data <- data[, numeric_columns]
+
+find_outliers <- function(column) {
+  column_no_na <- column[!is.na(column)]
+  if (length(column_no_na) > 0) {
+    q1 <- quantile(column_no_na, 0.25)
+    q3 <- quantile(column_no_na, 0.75)
+    iqr <- q3 - q1
+    lower_bound <- q1 - 1.5 * iqr
+    upper_bound <- q3 + 1.5 * iqr
+    outliers <- column_no_na[column_no_na < lower_bound | column_no_na > upper_bound]
+    return(outliers)
+  } else {
+    return(NULL)
+  }
+}
+
+column_stats <- data.frame(
+  Mean = apply(valid_data, 2, mean, na.rm = TRUE),
+  Variance = apply(valid_data, 2, var, na.rm = TRUE),
+  Min = apply(valid_data, 2, min, na.rm = TRUE),
+  Max = apply(valid_data, 2, max, na.rm = TRUE),
+  Fraction_NA = apply(valid_data, 2, function(x) sum(is.na(x)) / length(x))
+)
+
+# Find and print outliers for each column (excluding NA)
+for (col in colnames(valid_data)) {
+  outliers <- find_outliers(valid_data[[col]])
+  if (length(outliers) > 0) {
+    cat("Column:", col, "\n")
+    cat("Outliers:", outliers, "\n")
+    cat("Fraction of NA values:", column_stats$Fraction_NA[col], "\n\n")
+  }
+}
+
+```
+
+```{r}
+
+library(ggplot2)
+
+data <- read.table("crab.txt", header = TRUE, sep = "\t")
+
+plot <- ggplot(data, aes(x = spine, y = width)) +
+        geom_point() +
+        labs(title = "Scatter Plot of Spine and Width",
+             x = "Spine",
+             y = "Width")
+
+print(plot)
+```
+
+
+
+
