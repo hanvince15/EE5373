@@ -1,0 +1,75 @@
+---
+title: "Lab 5"
+author: "Vincent Han"
+date: "2023-07-20"
+output: html_document
+---
+
+```{r}
+# Required Libraries
+library(dplyr)
+library(purrr)
+library(ggplot2)
+```
+
+```{r}
+processors <- read.csv("all-data.csv")
+
+# Function to calculate benchmark metrics
+calculate_benchmark_metrics <- function(delta_vector) {
+  int95 <- quantile(delta_vector, 0.95)
+  int06 <- quantile(delta_vector, 0.06)
+  fp95 <- sum(delta_vector > int95) / length(delta_vector)
+  fp06 <- sum(delta_vector > int06) / length(delta_vector)
+  
+  return(list(int95 = int95, int06 = int06, fp95 = fp95, fp06 = fp06))
+}
+```
+
+```{r}
+# Set the range of f values and k repetitions
+f_values <- seq(0.1, 0.9, by = 0.1)
+k <- 100
+
+# Create a list to store the results for each f value
+results_list <- vector("list", length(f_values))
+
+# Data splitting and testing experiment
+set.seed(123) # Set a seed for reproducibility
+
+for (i in seq_along(f_values)) {
+  f <- f_values[i]
+  delta_i <- replicate(k, {
+    data <- # Load or prepare your data here
+    n <- nrow(data)
+    n_train <- round(f * n)
+    train_indices <- sample(1:n, n_train, replace = FALSE)
+    test_indices <- setdiff(1:n, train_indices)
+    
+    train_data <- data[train_indices, ]
+    test_data <- data[test_indices, ]
+    
+    # Train your model and make predictions
+    # Replace this with your actual model training and prediction code
+    predicted_values <- rep(0, nrow(test_data))
+    
+    # Calculate the delta_i vector for this partition
+    delta_vector <- test_data$actual_values - predicted_values
+    
+    return(delta_vector)
+  })
+  results_list[[i]] <- delta_i
+}
+
+```
+
+```{r}
+# Concatenate all delta_i vectors into D_f for each value of f
+D_f_list <- map(results_list, unlist)
+
+```
+
+```{r}
+
+```
+

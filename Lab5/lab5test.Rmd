@@ -6,7 +6,6 @@ output: html_document
 ---
 
 ```{r}
-setwd("/Users/alexanderdukart/Documents/Rdatasets")
 processors <- read.csv("all-data.csv")
 #set your directory here
 
