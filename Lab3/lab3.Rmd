@@ -1,6 +1,6 @@
 ---
 title: "Lab3"
-author: "alex dukart"
+author: "Vincent Han"
 date: "2023-06-14"
 output: html_document
 ---

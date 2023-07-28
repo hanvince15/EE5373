@@ -1,0 +1,30 @@
+---
+title: "lab3-han"
+author: "Vincent Han"
+date: "2023-07-10"
+output: html_document
+---
+
+```{r}
+library(genridge)
+data(prostate)
+
+input_var <- prostate$lcavol
+output_var <- prostate$lpsa
+
+print(input_var)
+print(output_var)
+```
+
+```{r}
+md1 <- lm(lcavol~lpsa,data=prostate)
+resid(md1)
+plot(prostate$lcavol,prostate$lpsa)
+abline(md1)
+summary(md1)
+plot(md1)
+```
+
+The linear regression model shows promising results with both the intercept and lpsa predictor being statistically significant (p-values < 0.001). The R-squared value of 0.5394 indicates that approximately 53.94% of the variance in lcavol is explained by lpsa. The residuals appear approximately symmetric and centered around zero, suggesting a decent fit, but without the residual plot, homoscedasticity and independence assumptions can't be definitively assessed. Further analysis is required to fully evaluate the model's adherence to linear regression assumptions and its overall quality. See log for exact values.
+
+
