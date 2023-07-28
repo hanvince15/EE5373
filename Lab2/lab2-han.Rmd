@@ -116,6 +116,7 @@ plot <- ggplot(data, aes(x = spine, y = width)) +
 print(plot)
 ```
 
+In this lab report, we analyzed the data frames, calculated key statistics, and detected outliers using the IQR method. The "Processor.Clock (Max) [MHz]" and "Transistors (millions)" columns were identified as unusual due to significant deviations. We observed anomalies in the "Voltage (low)" and "Voltage (high)" columns, suggesting data errors. To improve the data, we recommended cross-referencing with reliable sources and using imputation techniques if necessary. Additionally, we explored the relationship between "Processor Clock (MHz)" and "SpecInt2006 (average base)" columns, studying the impact on performance. Overall, our analysis provided insights into the dataset's quality and offered suggestions for enhancement.
 
 
 

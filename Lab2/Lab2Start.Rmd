@@ -70,4 +70,28 @@ return(data.frame(nperf,perf,clock,threads,cores,TDP,transistors,dieSize,voltage
 }
 int92.dat <- extract_data("Int1992")
 ```
+```{r}
+mean(int92.dat[,2], na.rm=TRUE)
+head(int92.dat)
+```
 
+
+```{r}
+int92.dat[15, 12]
+int92.dat[71,'perf']
+int92.dat[ ,'clock']
+int92.dat[36, ]
+nrow(int92.dat)
+ncol(int92.dat)
+```
+
+
+
+
+
+```{r}
+min(int92.dat$perf)
+max(int92.dat$perf)
+mean(int92.dat$perf)
+sd(int92.dat$perf)
+```
