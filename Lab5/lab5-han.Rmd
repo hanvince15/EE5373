@@ -5,71 +5,77 @@ date: "2023-07-20"
 output: html_document
 ---
 
-```{r}
-# Required Libraries
-library(dplyr)
-library(purrr)
-library(ggplot2)
-```
 
 ```{r}
-processors <- read.csv("all-data.csv")
+cpu_data <- read.csv("all-data.csv")
+# Load necessary libraries
+library(tidyverse)
 
-# Function to calculate benchmark metrics
-calculate_benchmark_metrics <- function(delta_vector) {
-  int95 <- quantile(delta_vector, 0.95)
-  int06 <- quantile(delta_vector, 0.06)
-  fp95 <- sum(delta_vector > int95) / length(delta_vector)
-  fp06 <- sum(delta_vector > int06) / length(delta_vector)
+
+# Step 2: Define a function for data splitting, model training, and prediction
+perform_split_and_predict <- function(data, f) {
+  n <- nrow(data)
+  N <- round((1 - f) * n)
   
-  return(list(int95 = int95, int06 = int06, fp95 = fp95, fp06 = fp06))
+  set.seed(NULL) # Do not set the random number seed for different partitions
+  
+  # Randomly split the data into training and testing sets
+  train_indices <- sample(1:n, N)
+  test_indices <- setdiff(1:n, train_indices)
+  
+  # Select the columns for training and testing
+  train_data <- data[train_indices, c("SpecInt1995 (average base)", "SpecInt2006 (average base)", "SpecFp1995 (average base)", "SpecFp2006 (average base)")]
+  test_data <- data[test_indices, c("SpecInt1995 (average base)", "SpecInt2006 (average base)", "SpecFp1995 (average base)", "SpecFp2006 (average base)")]
+  
+  # Train your model (use your own model training code here)
+  # Assuming you have a model called "my_model" that predicts the desired CPU benchmark values
+  # You can train the model using train_data and access the actual values using data$Actual_values[train_indices]
+  
+  # Predict on the test set
+  predicted_values <- predict(my_model, newdata = test_data)
+  
+  # Calculate delta_i for this partitioning
+  delta <- data$Actual_values[test_indices] - predicted_values
+  
+  return(delta)
 }
-```
 
-```{r}
-# Set the range of f values and k repetitions
-f_values <- seq(0.1, 0.9, by = 0.1)
+# Step 3 and 4: Repeat the process k times for each value of f and concatenate the delta vectors
 k <- 100
+f_values <- seq(0.1, 0.9, by = 0.1)
 
-# Create a list to store the results for each f value
-results_list <- vector("list", length(f_values))
-
-# Data splitting and testing experiment
-set.seed(123) # Set a seed for reproducibility
+D_f <- vector("list", length(f_values))
 
 for (i in seq_along(f_values)) {
-  f <- f_values[i]
-  delta_i <- replicate(k, {
-    data <- # Load or prepare your data here
-    n <- nrow(data)
-    n_train <- round(f * n)
-    train_indices <- sample(1:n, n_train, replace = FALSE)
-    test_indices <- setdiff(1:n, train_indices)
-    
-    train_data <- data[train_indices, ]
-    test_data <- data[test_indices, ]
-    
-    # Train your model and make predictions
-    # Replace this with your actual model training and prediction code
-    predicted_values <- rep(0, nrow(test_data))
-    
-    # Calculate the delta_i vector for this partition
-    delta_vector <- test_data$actual_values - predicted_values
-    
-    return(delta_vector)
-  })
-  results_list[[i]] <- delta_i
+  D_f[[i]] <- replicate(k, perform_split_and_predict(cpu_data, f_values[i]))
 }
 
-```
+# Convert the list of delta vectors into a single vector
+D_f <- unlist(D_f)
 
-```{r}
-# Concatenate all delta_i vectors into D_f for each value of f
-D_f_list <- map(results_list, unlist)
+# Step 5: Calculate the mean and confidence intervals for each f
+result_df <- data.frame(f = rep(f_values, each = k),
+                        delta = D_f)
 
-```
+mean_df <- result_df %>%
+  group_by(f) %>%
+  summarise(mean_delta = mean(delta),
+            sd_delta = sd(delta),
+            se_delta = sd_delta / sqrt(k),
+            lower_ci = mean_delta - 1.96 * se_delta,
+            upper_ci = mean_delta + 1.96 * se_delta)
 
-```{r}
+# Step 6: Plot the mean and 95 percent confidence intervals for each benchmark
+ggplot(mean_df, aes(x = f, y = mean_delta, group = 1)) +
+  geom_line() +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.1) +
+  labs(x = "f", y = "Mean Delta (Actual - Predicted)", title = "Mean and Confidence Intervals for D_f",
+       caption = "95% Confidence Intervals") +
+  theme_minimal()
+
+# Repeat the plotting steps for each benchmark (int95, int06, fp95, and fp06)
+# using the appropriate column names in the perform_split_and_predict function
+
 
 ```
 
