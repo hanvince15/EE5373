@@ -1,0 +1,46 @@
+---
+title: "lab7"
+author: "Vincent Han"
+date: "2023-07-28"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(gganimate)
+library(gifski)
+
+  house_data <- read.csv("kc_house_data.csv")
+# Assuming you have loaded the house_data and defined the backward_elimination function
+
+# Perform backward elimination
+X <- house_data[, predictor_variables]
+y <- house_data$price
+model <- backward_elimination(X, y)
+
+# Split data into training and testing sets (e.g., 70% train, 30% test)
+set.seed(42)  # For reproducibility
+train_indices <- sample(1:nrow(house_data), 0.7 * nrow(house_data))
+train <- house_data[train_indices, ]
+test <- house_data[-train_indices, ]
+
+# Make predictions on the test set
+test$predicted_price <- predict(model, newdata = test)
+
+# Calculate errors on the test set
+errors <- (test$predicted_price - test$price) * 100
+
+# Error plots for different percentages
+perc <- c(0.01, 0.05, 0.1, 1)
+
+for (x in perc) {
+  index <- 1:length(train$price)
+  base_map <- ggplot(
+    data = train,
+    mapping = aes(x = index, y = abs(errors), color = abs(errors), size = price)
+  ) + geom_point()
+  print(base_map)
+}
+
+```
