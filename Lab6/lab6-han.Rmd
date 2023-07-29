@@ -5,28 +5,97 @@ date: "2023-07-29"
 output: html_document
 ---
 
+
 ```{r}
-# Load required libraries
+
 library(dplyr)
 
-# Read the dataset
-house_data <- read.csv("kc_house_data.csv")
+  house_data <- read.csv("kc_house_data.csv")
+for (i in 1:5){
+  predictor_variables <- c("bedrooms", "bathrooms", "sqft_living", "sqft_lot", "floors", "waterfront", "view", "condition", "grade", "sqft_above", "sqft_basement", "yr_built", "yr_renovated", "zipcode", "lat", "long", "sqft_living15", "sqft_lot15")
+  X <- house_data[, predictor_variables]
+  y <- house_data$price
+  
+  backward_elimination <- function(X, y, threshold = 0.6) {
+    initial_model <- lm(y ~ ., data = cbind(y, X))
+    max_p_value <- max(summary(initial_model)$coefficients[-1, "Pr(>|t|)"])
+    
+    while (max_p_value > threshold) {
+      remove_variable <- which(summary(initial_model)$coefficients[-1, "Pr(>|t|)"] == max_p_value)
+      X <- X[, -remove_variable]
+      initial_model <- lm(y ~ ., data = cbind(y, X))
+      max_p_value <- max(summary(initial_model)$coefficients[-1, "Pr(>|t|)"])
+    }
+    
+    return(initial_model)
+  }
+  
+  final_model <- backward_elimination(X, y, threshold = 0.6)
+  
+  summary(final_model)
 
-data_in <- datahouse[,c(4,5,6,7,8,11)]
-data_price <- datahouse[,c(3)]
-data_zip <- datahouse[,c(17)]
 
-print(data_in)
-print(data_price)
-print(data_zip)
+
+  set.seed(42)
+  
+  sampled_indices <- sample(nrow(house_data), size = round(0.2 * nrow(house_data)))
+  
+  test_data <- house_data[sampled_indices, ]
+  
+  train_data <- house_data[-sampled_indices, ]
+
+  rmse <- 0
+  
+  predicted_prices <- predict(final_model, newdata = test_data)
+  
+  rmse <- sqrt(mean((test_data$price - predicted_prices)^2))
+  
+  cat("Root Mean Squared Error (RMSE) on the test data:", rmse, "\n")
+}
 ```
 
-– Bedrooms    4
-– Bathrooms   5
-– Sqft_living 6  
-– Sqft_lot    7
-– Floors      8
-– Condition   11
+I am trying to get different samples of the dataset to use for test_data to get different RMSE values, but I for some reason can't get it to work.
 
-- price       
-    
+PART 2
+
+```{r}
+house_data <- read.csv("kc_house_data.csv")
+
+sorted_data <- house_data %>% arrange(as.numeric(zipcode))
+
+grouped_data_list <- sorted_data %>% group_split(zipcode)
+
+```
+
+```{r}
+
+calculate_rmse <- function(df) {
+
+  predictors <- c("bedrooms", "bathrooms", "sqft_living", "sqft_lot", "grade", "yr_built", "price")
+  model_data <- df %>% select(all_of(predictors))
+
+  model <- lm(price ~ ., data = model_data)
+  
+  predicted_prices <- predict(model, newdata = model_data)
+  
+  rmse <- sqrt(mean((df$price - predicted_prices)^2))
+  
+  return(rmse)
+}
+
+rmse_list <- lapply(grouped_data_list, calculate_rmse)
+
+# Print the RMSE for each group
+for (i in seq_along(rmse_list)) {
+  zipcode <- names(rmse_list)[i]
+  cat("Zipcode:", zipcode, "RMSE:", rmse_list[[i]], "\n")
+}
+
+
+```
+
+Unable to print out the zip codes for some reason...
+
+These RMSE values vary a lot between each of the zip codes. Some are much smaller, and some can be much greater. I think there are a few different reasons why there is such a huge difference. One could be the amount of data in that zip code itself. I had not looked exactly at how many house datas are in each zip code, but some might contain less houses for that particular zip code. Additionally, the zip code itself can be very large in terms of physical space in that area. The larger the area, there is a higher chance that the properties in that zip code differ more drastically. This can cause more price fluctuation within a zipcode, causing less accurate predictions.
+
+For problem one, I had had it go through each column, and then remove the least changing input predictor from the model. I did this with f = 0.6, which got us down to the final model. For some reason I couldn't get it to train/test on a different split each time. This gave us identical RMSE results for each iteration.

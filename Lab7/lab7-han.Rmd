@@ -1,0 +1,107 @@
+---
+title: "lab7-han"
+author: "Vincent Han"
+date: "2023-07-29"
+output: html_document
+---
+
+```{r}
+
+library(dplyr)
+
+  house_data <- read.csv("kc_house_data.csv")
+
+  predictor_variables <- c("bedrooms", "bathrooms", "sqft_living", "sqft_lot", "floors", "waterfront", "view", "condition", "grade", "sqft_above", "sqft_basement", "yr_built", "yr_renovated", "zipcode", "lat", "long", "sqft_living15", "sqft_lot15")
+  X <- house_data[, predictor_variables]
+  y <- house_data$price
+  
+  backward_elimination <- function(X, y, threshold = 0.6) {
+    initial_model <- lm(y ~ ., data = cbind(y, X))
+    max_p_value <- max(summary(initial_model)$coefficients[-1, "Pr(>|t|)"])
+    
+    while (max_p_value > threshold) {
+      remove_variable <- which(summary(initial_model)$coefficients[-1, "Pr(>|t|)"] == max_p_value)
+      X <- X[, -remove_variable]
+      initial_model <- lm(y ~ ., data = cbind(y, X))
+      max_p_value <- max(summary(initial_model)$coefficients[-1, "Pr(>|t|)"])
+    }
+    
+    return(initial_model)
+  }
+  
+  final_model <- backward_elimination(X, y, threshold = 0.6)
+  
+  summary(final_model)
+  
+  
+```
+
+
+PART 1
+
+```{r}
+library(ggplot2)
+
+test_data$Predicted_Price <- predict(final_model, newdata = test_data)
+test_data$Percent_Error <- abs(100 * (test_data$Predicted_Price - test_data$price) / test_data$price)
+
+q_values <- c(0.01, 0.05, 0.10, 1.0)
+
+for (q in q_values) {
+  sampled_errors <- test_data[sample(nrow(test_data), round(q * nrow(test_data))), ]
+  
+  p <- ggplot(data = sampled_errors, aes(x = long, y = lat)) +
+    geom_point(aes(color = Percent_Error, size = price), alpha = 0.7) +
+    scale_color_gradient(low = "blue", high = "red") +
+    labs(title = paste("Fraction q =", q),
+         x = "Longitude",
+         y = "Latitude",
+         color = "Percent Error",
+         size = "Price") +
+    theme_minimal()
+  
+  print(p)
+}
+
+
+```
+
+I had changed the colors to blue and red since it is easier for me to see. It seems like the smaller the dot, the more red it is meaning the higher error.But honestly, most of them seem pretty blue, but there are not noticeable red ones but when they are red they are small. Meaning lower priced houses.
+
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(gifski)
+
+# Step 1: Make predictions using the final_model on the test_data
+test_data$Predicted_Price <- predict(final_model, newdata = test_data)
+test_data$Percent_Error <- abs(100 * (test_data$Predicted_Price - test_data$price) / test_data$price)
+
+# Step 2: Create separate plots for different fractions of errors (q = 0.01, 0.05, 0.10, and 1.0)
+q_values <- c(0.01, 0.05, 0.10, 1.0)
+
+for (q in q_values) {
+  sampled_errors <- test_data[sample(nrow(test_data), round(q * nrow(test_data))), ]
+  
+  # Plot the errors with color representing percent error and size representing the price
+  p <- ggplot(data = sampled_errors, aes(x = long, y = lat, frame = yr_built)) +
+    geom_point(aes(color = Percent_Error, size = price), alpha = 0.7) +
+    scale_color_gradient(low = "green", high = "red") +
+    labs(title = paste("Fraction q =", q),
+         x = "Longitude",
+         y = "Latitude",
+         color = "Percent Error",
+         size = "Price") +
+    theme_minimal()
+  
+  # Create the animation with gganimate
+  ani <- animate(p, nframes = nrow(sampled_errors), duration = 30)
+  
+  # Save the animation as a GIF using gifski
+  gifski::gif_write(ani, paste0("animation_q_", q, ".gif"), width = 800, height = 600)
+}
+
+
+
+```
