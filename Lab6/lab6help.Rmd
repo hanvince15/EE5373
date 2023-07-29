@@ -6,8 +6,7 @@ output: html_document
 ---
 
 ```{r}
-setwd("/Users/alexanderdukart/Documents/Rdatasets")
-datahouse <- read.csv("/Users/alexanderdukart/Documents/Rdatasets/kc_house_data.csv")
+datahouse <- read.csv("kc_house_data.csv")
 datafinal <- datahouse[,-c(1,2,17)]
 datafinal1 <- datahouse[,-c(1,2)]
 ```
@@ -25,8 +24,7 @@ summary(lm(price~zipcode,data=datafinal1z))
 
 
 ```{r}
-setwd("/Users/alexanderdukart/Documents/Rdatasets")
-datahouse <- read.csv("/Users/alexanderdukart/Documents/Rdatasets/kc_house_data.csv")
+datahouse <- read.csv("kc_house_data.csv")
 datafinal <- datahouse[,-c(1,2,17)]
 datafinal1 <- datahouse[,-c(1,2)]
 library("dplyr")
